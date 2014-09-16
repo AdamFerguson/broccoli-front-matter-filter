@@ -22,9 +22,9 @@
   },
   "dependencies": {
     "broccoli-writer": "~0.1.1",
-    "front-matter": "~0.2.0",
     "gray-matter": "^0.5.0",
     "mkdirp": "~0.5.0",
+    "object-merge": "^2.5.1",
     "q-io": "~1.11.5",
     "rsvp": "~3.0.13",
     "walk-sync": "~0.1.2"

@@ -1,11 +1,11 @@
-var Writer    = require('broccoli-writer');
-var walkSync  = require('walk-sync');
-var FS        = require('q-io/fs');
-var RSVP      = require('rsvp');
-var path      = require('path');
-var mkdirp    = require('mkdirp');
-// var fm        = require('front-matter');
-var matter    = require('gray-matter');
+var Writer      = require('broccoli-writer');
+var walkSync    = require('walk-sync');
+var FS          = require('q-io/fs');
+var RSVP        = require('rsvp');
+var path        = require('path');
+var mkdirp      = require('mkdirp');
+var matter      = require('gray-matter');
+var objectMerge = require('object-merge');
 
 module.exports = FrontMatterFilter;
 
@@ -15,7 +15,13 @@ FrontMatterFilter.prototype.constructor = FrontMatterFilter;
 function FrontMatterFilter (inputTree, options) {
   if (!(this instanceof FrontMatterFilter)) return new FrontMatterFilter(inputTree, options);
 
-  this.options   = options || {};
+  var defaultOptions = {
+    stripFrontMatter:      true,
+    removeIfNoFrontMatter: false,
+    grayMatter: {}
+  };
+
+  this.options   = objectMerge(defaultOptions, (options || {}));
   this.inputTree = inputTree;
 }
 
@@ -23,7 +29,7 @@ FrontMatterFilter.prototype.write = function(readTree, destDir) {
   var includeCB             = this.options.include;
   var strip                 = this.options.stripFrontMatter;
   var removeIfNoFrontMatter = this.options.removeIfNoFrontMatter;
-  var grayMatterOptions     = this.options.grayMatter || {};
+  var grayMatterOptions     = this.options.grayMatter;
   var dirRegExp = /\/$/;
 
   var hasIncludeCB = (typeof(includeCB) === 'function');

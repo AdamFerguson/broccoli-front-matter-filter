@@ -42,6 +42,31 @@ describe('broccoli-front-matter-filter', function() {
     });
   });
 
+  describe('stripFrontMatter', function() {
+    it('removes front matter by default from file sent to destination tree', function() {
+      var tree = filterFrontMatter(sourcePath);
+
+      return buildTree(tree).then(function(dir) {
+        var destPath = path.join(dir.directory, 'ios.md');
+        var fileContent = fs.readFileSync(destPath, {encoding: 'utf8'});
+        debugger;
+        expect(/^##/.test(fileContent)).to.be.ok();
+      });
+    });
+
+    it('retains front matter if specified', function() {
+      var tree = filterFrontMatter(sourcePath, {
+        stripFrontMatter: false
+      });
+
+      return buildTree(tree).then(function(dir) {
+        var destPath = path.join(dir.directory, 'ios.md');
+        var fileContent = fs.readFileSync(destPath, {encoding: 'utf8'});
+        expect(/^---/.test(fileContent)).to.be.ok();
+      });
+    });
+  });
+
   describe('include', function() {
     it('sends through files that eval true', function() {
       var tree = filterFrontMatter(sourcePath, {
