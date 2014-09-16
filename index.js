@@ -23,13 +23,18 @@ FrontMatterFilter.prototype.write = function(readTree, destDir) {
   var includeCB = this.options.include;
   var strip      = this.options.stripFrontMatter;
   var removeIfNoFrontMatter = this.options.removeIfNoFrontMatter;
+  var dirRegExp = /\/$/;
 
   var hasIncludeCB = (typeof(includeCB) === 'function');
 
   return readTree(this.inputTree).then(function(srcDir) {
     var filePaths = walkSync(srcDir);
+    var onlyFiles = filePaths.filter(function(filePath) {
+      // Is not a directory
+      return !dirRegExp.test(filePath);
+    });
 
-    return RSVP.all(filePaths.map(function(filePath) {
+    return RSVP.all(onlyFiles.map(function(filePath) {
       var srcFilePath  = path.join(srcDir, filePath);
       var destFilePath = path.join(destDir, filePath);
 
