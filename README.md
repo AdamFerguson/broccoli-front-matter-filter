@@ -34,19 +34,6 @@ desktop: true
 ## Hello from the desktop
 ```
 
-Excluding 'mobile' files:
-
-```javascript
-var filterFrontMatter = require('broccoli-front-matter-filter');
-
-var tree = filterFrontMatter('src', {
-  include: function(frontMatter) {
-    return frontMatter.mobile !== true;
-  }
-});
-// tree will include 'src/windoz.md'
-```
-
 Including 'desktop' files:
 
 ```javascript
@@ -71,14 +58,6 @@ var tree = filterFrontMatter('src', {
 A callback that is passed the value of the parsed front matter. If the callback
 returns a truthy value, then the file will be included in the destination tree.
 Otherwise, it will not.
-
----
-
-`options.exclude` *{Function}*
-
-A callback that is passed the value of the parsed front matter. If the callback
-returns a truthy value, then the file will *not* be included in the destination tree.
-Otherwise, it will.
 
 ---
 
