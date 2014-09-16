@@ -15,13 +15,17 @@ describe('broccoli-front-matter-filter', function() {
     }
   });
 
+  var buildTree = function(inputTree) {
+    builder = new broccoli.Builder(inputTree);
+    return builder.build();
+  };
+
   describe('removeIfNoFrontMatter', function() {
     it('does not filter files without front matter by default', function() {
       var tree = filterFrontMatter(sourcePath);
 
-      builder = new broccoli.Builder(tree);
-      return builder.build().then(function(dir) {
-        var destPath = path.join(dir.directory, 'no-front-matter-file.js');
+      return buildTree(tree).then(function(dir) {
+        var destPath = path.join(dir.directory, 'no-front-matter-file.md');
         expect(fs.existsSync(destPath)).to.be.ok();
       });
     });
@@ -31,8 +35,7 @@ describe('broccoli-front-matter-filter', function() {
         removeIfNoFrontMatter: true
       });
 
-      builder = new broccoli.Builder(tree);
-      return builder.build().then(function(dir) {
+      return buildTree(tree).then(function(dir) {
         var destPath = path.join(dir.directory, 'no-front-matter-file.js');
         expect(fs.existsSync(destPath)).to.not.be.ok();
       });
@@ -47,13 +50,39 @@ describe('broccoli-front-matter-filter', function() {
         }
       });
 
-      builder = new broccoli.Builder(tree);
-      return builder.build().then(function(dir) {
-        var iosPath = path.join(dir.directory, 'ios.js');
-        var windowzPath = path.join(dir.directory, 'windoz.js');
+      return buildTree(tree).then(function(dir) {
+        var iosPath = path.join(dir.directory, 'ios.md');
+        var windozPath = path.join(dir.directory, 'windoz.md');
 
         expect(fs.existsSync(iosPath)).to.be.ok();
-        expect(fs.existsSync(windowzPath)).to.not.be.ok();
+        expect(fs.existsSync(windozPath)).to.not.be.ok();
+      });
+    });
+  });
+
+  describe('grayMatter', function() {
+    it('accepts grayMatter options to pass through to front matter parser', function() {
+      var tree = filterFrontMatter(sourcePath, {
+        grayMatter: {
+          delims: [['\\/\\*\\* yaml', '---'], ['\\*\\*\\/', '---']]
+        },
+        include: function(frontMatter) {
+          return frontMatter.mobile === true;
+        }
+      });
+
+      return buildTree(tree).then(function(dir) {
+        var iosPath = path.join(dir.directory, 'ios.md');
+        var windozPath = path.join(dir.directory, 'windoz.md');
+
+        var iosJsPath = path.join(dir.directory, 'sub', 'ios.js');
+        var windozJsPath = path.join(dir.directory, 'sub', 'windoz.js');
+
+        expect(fs.existsSync(iosPath)).to.be.ok();
+        expect(fs.existsSync(windozPath)).to.not.be.ok();
+
+        expect(fs.existsSync(iosJsPath)).to.be.ok();
+        expect(fs.existsSync(windozJsPath)).to.not.be.ok();
       });
     });
   });

@@ -4,7 +4,8 @@ var FS        = require('q-io/fs');
 var RSVP      = require('rsvp');
 var path      = require('path');
 var mkdirp    = require('mkdirp');
-var fm        = require('front-matter');
+// var fm        = require('front-matter');
+var matter    = require('gray-matter');
 
 module.exports = FrontMatterFilter;
 
@@ -19,10 +20,10 @@ function FrontMatterFilter (inputTree, options) {
 }
 
 FrontMatterFilter.prototype.write = function(readTree, destDir) {
-  var self = this;
-  var includeCB = this.options.include;
-  var strip      = this.options.stripFrontMatter;
+  var includeCB             = this.options.include;
+  var strip                 = this.options.stripFrontMatter;
   var removeIfNoFrontMatter = this.options.removeIfNoFrontMatter;
+  var grayMatterOptions     = this.options.grayMatter || {};
   var dirRegExp = /\/$/;
 
   var hasIncludeCB = (typeof(includeCB) === 'function');
@@ -39,7 +40,7 @@ FrontMatterFilter.prototype.write = function(readTree, destDir) {
       var destFilePath = path.join(destDir, filePath);
 
       return FS.read(srcFilePath).then(function(content) {
-        var hasFrontMatter = fm.test(content);
+        var hasFrontMatter = matter.exists(content, grayMatterOptions);
 
         if (!hasFrontMatter) {
           if (!removeIfNoFrontMatter) {
@@ -48,9 +49,12 @@ FrontMatterFilter.prototype.write = function(readTree, destDir) {
             return RSVP.Promise.resolve(true);
           }
         } else {
-          var parsed = fm(content);
-          if (hasIncludeCB && includeCB(parsed.attributes)) {
-            return _writeFile(destFilePath, (strip ? parsed.body : content));
+          var parsed = matter(content, grayMatterOptions);
+          if (hasIncludeCB && includeCB(parsed.data)) {
+            return _writeFile(destFilePath, (strip ? parsed.content : content));
+          } else if (!hasIncludeCB) {
+            // pass through if include callback not provided
+            return _writeFile(destFilePath, (strip ? parsed.content : content));
           }
         }
       });
