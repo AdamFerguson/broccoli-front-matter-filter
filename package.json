@@ -1,0 +1,30 @@
+{
+  "name": "broccoli-front-matter-filter",
+  "version": "0.0.1",
+  "description": "Broccoli plugin to filter files based on parsed front matter",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha tests/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@bitbucket.org:adamferguson/broccoli-front-matter-filter.git"
+  },
+  "keywords": [
+    "broccoli-plugin"
+  ],
+  "author": "Adam Ferguson",
+  "license": "MIT",
+  "devDependencies": {
+    "expect.js": "~0.3.1",
+    "mocha": "~1.21.4",
+    "broccoli": "~0.12.3"
+  },
+  "dependencies": {
+    "broccoli-writer": "~0.1.1",
+    "walk-sync": "~0.1.2",
+    "q-io": "~1.11.5",
+    "rsvp": "~3.0.13",
+    "mkdirp": "~0.5.0"
+  }
+}
