@@ -78,7 +78,7 @@ tree. Otherwise, the file will be left alone. _Default_: `true`
 `options.grayMatter` *{Object}*
 
 This uses [gray-matter](https://github.com/jonschlinkert/gray-matter) for front matter
-parsing. Gray matter support additional features like configuring the type of front matter,
+parsing. Gray matter supports additional features like configuring the type of front matter,
 evaluating the front matter, if you wish to use coffeescript or javascript, and specifying
 different delimiters (amongst other features). Any options provided here will be passed
 through to the gray matter parser. So, to support multiple types of front matter delimiters,
@@ -97,4 +97,4 @@ var tree = filterFrontMatter('src', {
 
 **Note:** the delims are converted to regular expressions. If you wish to use characters that
 are reserved in regular expressions as delimiters, then you must escape them both from the defining string
-and to be passed to the regular expression (hence the double backslashes).
+and to the regular expression (hence the double backslashes).
