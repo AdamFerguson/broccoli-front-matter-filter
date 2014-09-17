@@ -1,11 +1,15 @@
 var Writer      = require('broccoli-writer');
 var walkSync    = require('walk-sync');
-var FS          = require('q-io/fs');
 var RSVP        = require('rsvp');
 var path        = require('path');
 var mkdirp      = require('mkdirp');
 var matter      = require('gray-matter');
 var objectMerge = require('object-merge');
+var fs          = require('graceful-fs');
+
+var promiseReadFile  = RSVP.denodeify(fs.readFile);
+var promiseWriteFile = RSVP.denodeify(fs.writeFile);
+var promiseFileClose = RSVP.denodeify(fs.close);
 
 module.exports = FrontMatterFilter;
 
@@ -30,22 +34,25 @@ FrontMatterFilter.prototype.write = function(readTree, destDir) {
   var strip                 = this.options.stripFrontMatter;
   var removeIfNoFrontMatter = this.options.removeIfNoFrontMatter;
   var grayMatterOptions     = this.options.grayMatter;
-  var dirRegExp = /\/$/;
 
   var hasIncludeCB = (typeof(includeCB) === 'function');
 
   return readTree(this.inputTree).then(function(srcDir) {
     var filePaths = walkSync(srcDir);
-    var onlyFiles = filePaths.filter(function(filePath) {
-      // Is not a directory
-      return !dirRegExp.test(filePath);
-    });
 
-    return RSVP.all(onlyFiles.map(function(filePath) {
+    return RSVP.all(filePaths.map(function(filePath) {
       var srcFilePath  = path.join(srcDir, filePath);
       var destFilePath = path.join(destDir, filePath);
 
-      return FS.read(srcFilePath).then(function(content) {
+      // handle directories
+      if (destFilePath.slice(-1) === '/') {
+        mkdirp.sync(destFilePath);
+        return RSVP.resolve();
+      }
+      console.log(destFilePath);
+
+      // return promiseReadFile(srcFilePath, {encoding: 'utf8'}).then(function(content) {
+      return _readFile(srcFilePath).then(function(content) {
         var hasFrontMatter = matter.exists(content, grayMatterOptions);
 
         if (!hasFrontMatter) {
@@ -70,6 +77,9 @@ FrontMatterFilter.prototype.write = function(readTree, destDir) {
 
 // Returns a promise
 function _writeFile(destFilePath, contents) {
-  mkdirp.sync(path.dirname(destFilePath));
-  return FS.write(destFilePath, contents);
+  return promiseWriteFile(destFilePath, contents, {encoding: 'utf8'});
+}
+
+function _readFile(srcFilePath) {
+  return promiseReadFile(srcFilePath, {encoding: 'utf8'});
 }

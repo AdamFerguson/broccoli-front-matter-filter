@@ -3,6 +3,9 @@ var expect            = require('expect.js');
 var broccoli          = require('broccoli');
 var fs                = require('fs');
 var path              = require('path');
+var rimraf            = require('rimraf');
+var mkdirp            = require('mkdirp');
+var RSVP              = require('rsvp');
 
 describe('broccoli-front-matter-filter', function() {
   var sourcePath = 'tests/fixtures';
@@ -49,7 +52,6 @@ describe('broccoli-front-matter-filter', function() {
       return buildTree(tree).then(function(dir) {
         var destPath = path.join(dir.directory, 'ios.md');
         var fileContent = fs.readFileSync(destPath, {encoding: 'utf8'});
-        debugger;
         expect(/^##/.test(fileContent)).to.be.ok();
       });
     });
@@ -108,6 +110,45 @@ describe('broccoli-front-matter-filter', function() {
 
         expect(fs.existsSync(iosJsPath)).to.be.ok();
         expect(fs.existsSync(windozJsPath)).to.not.be.ok();
+      });
+    });
+  });
+
+  // Set a low ulimit on the testing system to better test this
+  describe('lots of files and concurrent builds', function() {
+    var lotsOfFilesPath = path.join(sourcePath, 'lots_o_files');
+    beforeEach(function(done) {
+      mkdirp.sync(lotsOfFilesPath);
+      var i;
+      for(i=0; i < 6000; i++) {
+        var filePath = path.join(lotsOfFilesPath, i.toString());
+        fs.writeFileSync(filePath, 'Hello ' + i);
+      }
+      done();
+    });
+
+    afterEach(function(done) {
+      rimraf(lotsOfFilesPath, function(err) {
+        if (err) {
+          console.log('There was an error removing all the files from lots of files test');
+        }
+        done();
+      });
+    });
+
+    it('does not error with lots of files', function() {
+      var tree = filterFrontMatter(sourcePath, {
+        include: function(frontMatter) {
+          return frontMatter.mobile === true;
+        }
+      });
+
+      var firstBuild = buildTree(tree);
+      var secondBuild = buildTree(tree);
+      return RSVP.all([firstBuild, secondBuild]).then(function(dir) {
+        // If there is an exception raised during buildTree
+        // we should not make it here, which is what we're testing
+        expect(true).to.be.ok();
       });
     });
   });
