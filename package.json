@@ -1,6 +1,6 @@
 {
   "name": "broccoli-front-matter-filter",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Broccoli plugin to filter files based on parsed front matter",
   "main": "index.js",
   "scripts": {
@@ -8,10 +8,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git@bitbucket.org:adamferguson/broccoli-front-matter-filter.git"
+    "url": "https://github.com/AdamFerguson/broccoli-front-matter-filter"
   },
   "keywords": [
-    "broccoli-plugin"
+    "broccoli-plugin",
+    "frontmatter",
+    "gray-matter",
+    "frontmatter",
+    "front",
+    "matter"
   ],
   "author": "Adam Ferguson",
   "license": "MIT",

@@ -1,7 +1,7 @@
 # Broccoli Front Matter Filter
 
-A Broccoli plugin that includes or excludes files from being included
-in the destination tree based on the values of front matter found
+A Broccoli plugin that includes or excludes files from the
+destination tree based on the values of front matter
 in the individual files.
 
 ## Installation
