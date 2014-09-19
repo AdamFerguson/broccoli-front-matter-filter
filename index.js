@@ -1,15 +1,10 @@
 var Writer      = require('broccoli-writer');
 var walkSync    = require('walk-sync');
-var RSVP        = require('rsvp');
 var path        = require('path');
 var mkdirp      = require('mkdirp');
 var matter      = require('gray-matter');
 var objectMerge = require('object-merge');
-var fs          = require('graceful-fs');
-
-var promiseReadFile  = RSVP.denodeify(fs.readFile);
-var promiseWriteFile = RSVP.denodeify(fs.writeFile);
-var promiseFileClose = RSVP.denodeify(fs.close);
+var fs          = require('fs');
 
 module.exports = FrontMatterFilter;
 
@@ -40,45 +35,33 @@ FrontMatterFilter.prototype.write = function(readTree, destDir) {
   return readTree(this.inputTree).then(function(srcDir) {
     var filePaths = walkSync(srcDir);
 
-    return RSVP.all(filePaths.map(function(filePath) {
+    return filePaths.map(function(filePath) {
       var srcFilePath  = path.join(srcDir, filePath);
       var destFilePath = path.join(destDir, filePath);
 
       // handle directories
       if (destFilePath.slice(-1) === '/') {
         mkdirp.sync(destFilePath);
-        return RSVP.resolve();
+        return;
       }
 
-      // return promiseReadFile(srcFilePath, {encoding: 'utf8'}).then(function(content) {
-      return _readFile(srcFilePath).then(function(content) {
-        var hasFrontMatter = matter.exists(content, grayMatterOptions);
+      var content = fs.readFileSync(srcFilePath, {encoding: 'utf8'});
+      var hasFrontMatter = matter.exists(content, grayMatterOptions);
 
-        if (!hasFrontMatter) {
-          if (!removeIfNoFrontMatter) {
-            return _writeFile(destFilePath, content);
-          } else {
-            return RSVP.Promise.resolve(true);
-          }
-        } else {
-          var parsed = matter(content, grayMatterOptions);
-          if (hasIncludeCB && includeCB(parsed.data)) {
-            return _writeFile(destFilePath, (strip ? parsed.content : content));
-          } else if (!hasIncludeCB) {
-            // pass through if include callback not provided
-            return _writeFile(destFilePath, (strip ? parsed.content : content));
-          }
+      if (!hasFrontMatter) {
+        if (!removeIfNoFrontMatter) {
+          fs.writeFileSync(destFilePath, content);
+        } 
+      } else {
+        var parsed = matter(content, grayMatterOptions);
+        if (hasIncludeCB && includeCB(parsed.data)) {
+          fs.writeFileSync(destFilePath, (strip ? parsed.content : content));
+        } else if (!hasIncludeCB) {
+          // pass through if include callback not provided
+          fs.writeFileSync(destFilePath, (strip ? parsed.content : content));
         }
-      });
-    }));
+      }
+      return;
+    });
   });
 };
-
-// Returns a promise
-function _writeFile(destFilePath, contents) {
-  return promiseWriteFile(destFilePath, contents, {encoding: 'utf8'});
-}
-
-function _readFile(srcFilePath) {
-  return promiseReadFile(srcFilePath, {encoding: 'utf8'});
-}

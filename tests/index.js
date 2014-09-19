@@ -5,7 +5,6 @@ var fs                = require('fs');
 var path              = require('path');
 var rimraf            = require('rimraf');
 var mkdirp            = require('mkdirp');
-var RSVP              = require('rsvp');
 var mergeTrees        = require('broccoli-merge-trees');
 
 describe('broccoli-front-matter-filter', function() {
