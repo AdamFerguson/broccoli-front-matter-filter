@@ -10,7 +10,6 @@ var mergeTrees        = require('broccoli-merge-trees');
 describe('broccoli-front-matter-filter', function() {
   var sourcePath = 'tests/fixtures';
   var builder;
-  var tree;
 
   afterEach(function() {
     if (builder) {
@@ -46,25 +45,25 @@ describe('broccoli-front-matter-filter', function() {
   });
 
   describe('stripFrontMatter', function() {
-    it('removes front matter by default from file sent to destination tree', function() {
+    it('retains front matter by default in file sent to destination tree', function() {
       var tree = filterFrontMatter(sourcePath);
 
       return buildTree(tree).then(function(dir) {
         var destPath = path.join(dir.directory, 'ios.md');
         var fileContent = fs.readFileSync(destPath, {encoding: 'utf8'});
-        expect(/^##/.test(fileContent)).to.be.ok();
+        expect(/^---/.test(fileContent)).to.be.ok();
       });
     });
 
-    it('retains front matter if specified', function() {
+    it('removes front matter if specified', function() {
       var tree = filterFrontMatter(sourcePath, {
-        stripFrontMatter: false
+        stripFrontMatter: true
       });
 
       return buildTree(tree).then(function(dir) {
         var destPath = path.join(dir.directory, 'ios.md');
         var fileContent = fs.readFileSync(destPath, {encoding: 'utf8'});
-        expect(/^---/.test(fileContent)).to.be.ok();
+        expect(/^##/.test(fileContent)).to.be.ok();
       });
     });
   });
@@ -128,6 +127,7 @@ describe('broccoli-front-matter-filter', function() {
     });
 
     afterEach(function(done) {
+      this.timeout(5000);
       rimraf(lotsOfFilesPath, function(err) {
         if (err) {
           console.log('There was an error removing all the files from lots of files test');

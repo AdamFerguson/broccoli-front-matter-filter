@@ -29,6 +29,7 @@
   },
   "dependencies": {
     "broccoli-caching-writer": "^0.4.2",
+    "copy-dereference": "^1.0.0",
     "gray-matter": "^0.5.0",
     "mkdirp": "~0.5.0",
     "object-merge": "^2.5.1",

@@ -6,6 +6,8 @@ var matter      = require('gray-matter');
 var objectMerge = require('object-merge');
 var fs          = require('fs');
 
+var copyDereferenceSync = require('copy-dereference').sync;
+
 module.exports = FrontMatterFilter;
 
 FrontMatterFilter.prototype = Object.create(Writer.prototype);
@@ -15,7 +17,7 @@ function FrontMatterFilter (inputTree, options) {
   if (!(this instanceof FrontMatterFilter)) return new FrontMatterFilter(inputTree, options);
 
   var defaultOptions = {
-    stripFrontMatter:      true,
+    stripFrontMatter:      false,
     removeIfNoFrontMatter: false,
     grayMatter: {}
   };
@@ -49,18 +51,30 @@ FrontMatterFilter.prototype.updateCache = function(srcDir, destDir) {
 
     if (!hasFrontMatter) {
       if (!removeIfNoFrontMatter) {
-        fs.writeFileSync(destFilePath, content);
-      } 
+        // fs.writeFileSync(destFilePath, content);
+        _copyFile(srcFilePath, destFilePath)
+      }
     } else {
       var parsed = matter(content, grayMatterOptions);
       if (hasIncludeCB && includeCB(parsed.data)) {
-        fs.writeFileSync(destFilePath, (strip ? parsed.content : content));
+        // fs.writeFileSync(destFilePath, (strip ? parsed.content : content));
+        _copyFile(srcFilePath, destFilePath, parsed.content, strip);
       } else if (!hasIncludeCB) {
         // pass through if include callback not provided
-        fs.writeFileSync(destFilePath, (strip ? parsed.content : content));
+        // fs.writeFileSync(destFilePath, (strip ? parsed.content : content));
+        _copyFile(srcFilePath, destFilePath, parsed.content, strip);
       }
     }
   });
 
   return destDir;
 };
+
+function _copyFile(srcFilePath, destFilePath, parsedContent, strip) {
+  if (strip) {
+    // Need to implement caching still
+    fs.writeFileSync(destFilePath, parsedContent);
+  } else {
+    copyDereferenceSync(srcFilePath, destFilePath);
+  }
+}
