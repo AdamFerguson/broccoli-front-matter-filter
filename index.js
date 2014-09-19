@@ -49,7 +49,6 @@ FrontMatterFilter.prototype.write = function(readTree, destDir) {
         mkdirp.sync(destFilePath);
         return RSVP.resolve();
       }
-      console.log(destFilePath);
 
       // return promiseReadFile(srcFilePath, {encoding: 'utf8'}).then(function(content) {
       return _readFile(srcFilePath).then(function(content) {

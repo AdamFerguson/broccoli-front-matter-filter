@@ -6,6 +6,7 @@ var path              = require('path');
 var rimraf            = require('rimraf');
 var mkdirp            = require('mkdirp');
 var RSVP              = require('rsvp');
+var mergeTrees        = require('broccoli-merge-trees');
 
 describe('broccoli-front-matter-filter', function() {
   var sourcePath = 'tests/fixtures';
@@ -137,15 +138,20 @@ describe('broccoli-front-matter-filter', function() {
     });
 
     it('does not error with lots of files', function() {
-      var tree = filterFrontMatter(sourcePath, {
+      this.timeout(5000);
+      var firstTree = filterFrontMatter(sourcePath, {
+        include: function(frontMatter) {
+          return frontMatter.mobile === true;
+        }
+      });
+      var secondTree = filterFrontMatter(sourcePath, {
         include: function(frontMatter) {
           return frontMatter.mobile === true;
         }
       });
 
-      var firstBuild = buildTree(tree);
-      var secondBuild = buildTree(tree);
-      return RSVP.all([firstBuild, secondBuild]).then(function(dir) {
+      var tree = mergeTrees([firstTree, secondTree], {overwrite: true});
+      return buildTree(tree).then(function(dir) {
         // If there is an exception raised during buildTree
         // we should not make it here, which is what we're testing
         expect(true).to.be.ok();
