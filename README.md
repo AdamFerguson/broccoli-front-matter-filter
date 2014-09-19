@@ -71,7 +71,11 @@ not be included in the destination tree. _Default_: `false`
 `options.stripFrontMatter` *{Boolean}*
 
 If true, front matter will be removed from the file before going to the destination
-tree. Otherwise, the file will be left alone. _Default_: `true`
+tree. Otherwise, the file will be left alone. Note, caching is not implemented in this
+library yet which means values of `true` will modify any files with front matter.
+The result is slower incremental rebuild time that increases as the number of files with
+front matter increases. Until caching is implemented, it is recommended to keep
+this value set to `false`.  _Default_: `false`
 
 ---
 
