@@ -1,6 +1,6 @@
 {
   "name": "broccoli-front-matter-filter",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Broccoli plugin to filter files based on parsed front matter",
   "main": "index.js",
   "scripts": {

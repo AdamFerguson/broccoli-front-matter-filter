@@ -36,12 +36,12 @@ FrontMatterFilter.prototype.updateCache = function(srcDir, destDir) {
 
   var filePaths = walkSync(srcDir);
 
-  filePaths.map(function(filePath) {
+  filePaths.forEach(function(filePath) {
     var srcFilePath  = path.join(srcDir, filePath);
     var destFilePath = path.join(destDir, filePath);
 
     // handle directories
-    if (destFilePath.slice(-1) === '/') {
+    if (filePath.slice(-1) === '/') {
       mkdirp.sync(destFilePath);
       return;
     }
